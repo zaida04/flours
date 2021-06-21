@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  api:
+    env_file: .env
+  frontend:
+    env_file: .env
+  mongo:
+    env_file: .env

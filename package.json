@@ -1,0 +1,36 @@
+{
+  "name": "@flours/main",
+  "version": "0.0.0",
+  "description": "Main overarching repo for flours",
+  "scripts": {
+    "build": "pnpm recursive run build",
+    "lint": "npx eslint services/ --ext .ts",
+    "lint:fix": "npx eslint services/ --ext .ts --fix",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-angular": "^11.0.0",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.6.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-simple-import-sort": "^5.0.3",
+    "eslint-plugin-sort-keys-fix": "^1.1.1",
+    "husky": "^6.0.0",
+    "lint-staged": "^10.4.2",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaida04/flours.git"
+  },
+  "author": "Zaid \"Nico\"",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zaida04/flours/issues"
+  },
+  "homepage": "https://github.com/zaida04/flours#readme"
+}

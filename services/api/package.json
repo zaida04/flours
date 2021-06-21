@@ -1,0 +1,26 @@
+{
+    "name": "@flours/api",
+    "version": "1.0.0",
+    "description": "Flours API service",
+    "main": "./dist/index.js",
+    "scripts": {
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "@types/compression": "^1.7.0",
+        "@types/express": "^4.17.8",
+        "@types/express-session": "^1.17.0",
+        "@types/node": "^14.14.14",
+        "dotenv": "^8.2.0"
+    },
+    "dependencies": {
+        "express": "^4.17.1",
+        "express-session": "^1.17.1",
+        "express-validator": "^6.6.1",
+        "mongoose": "^5.12.14",
+        "tslib": "^2.0.3",
+        "typescript": "^4.1.3"
+    },
+    "author": "Nico",
+    "license": "MIT"
+}
