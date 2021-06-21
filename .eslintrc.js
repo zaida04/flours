@@ -1,24 +1,33 @@
 module.exports = {
     env: {
+        browser: true,
         node: true,
+        es2020: true
     },
-    extends: ['plugin:@typescript-eslint/recommended', 'prettier/@typescript-eslint', 'plugin:prettier/recommended'],
+    extends: ["airbnb-typescript", 'prettier/@typescript-eslint', 'plugin:prettier/recommended'],
     ignorePatterns: ['__tests__/**', 'node_modules/**', 'dist/**', 'types/**', '*.d.ts'],
-    overrides: [
-        {
-            files: ['packages/guilded-api-typings/**', 'packages/embeds'],
-            rules: {
-                '@typescript-eslint/naming-convention': 'off',
-            },
-        },
-    ],
     parser: '@typescript-eslint/parser',
     parserOptions: {
-        ecmaVersion: 2020,
+        project: "./tsconfig.eslint.json"
     },
-    plugins: ['simple-import-sort', 'sort-keys-fix'],
+    plugins: ['sort-keys-fix'],
     root: true,
     rules: {
+        "react/jsx-filename-extension": [1, { extensions: [".js", ".jsx", ".ts", ".tsx"] }],
+        "react/react-in-jsx-scope": "off",
+        "react/prop-types": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "jsx-a11y/anchor-is-valid": [
+            "error",
+            {
+                components: ["Link"],
+                specialLink: ["hrefLeft", "hrefRight"],
+                aspects: ["invalidHref", "preferButton"]
+            }
+        ],
+        "jsx-a11y/alt-text": "warn",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "react/no-unescaped-entities": "warn",
         '@typescript-eslint/no-var-requires': "off",
         '@typescript-eslint/explicit-member-accessibility': 'warn',
         '@typescript-eslint/naming-convention': [

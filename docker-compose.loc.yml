@@ -2,22 +2,43 @@ version: '3.7'
 
 services:
     api:
+        build:
+            context: .
+            dockerfile: ./services/api/Dockerfile.local
         environment: 
             MONGO_USERNAME: niconiconii
             MONGO_PASS: にっこにっこにー
             MONGO_HOST: localhost
             MONGO_DB: testingdb
             PORT: 4327
-	    volumes:
-            - ./services/api:/usr/app
-            - /usr/app/node_modules/
+        ports:
+            - "4327:4327"
+        volumes:
+            - ./services/api:/usr/app/services/api
+            - /usr/app/services/api/node_modules/
     frontend:
+        build:
+            context: .
+            dockerfile: ./services/frontend/Dockerfile.local
         environment: 
             API_URL: localhost:4327/api
             PORT: 4328
-	    volumes:
-            - ./services/frontend:/usr/app
-            - /usr/app/node_modules/
+        ports:
+            - "4328:4328"
+        volumes:
+            - ./services/frontend:/usr/app/services/frontend
+            - /usr/app/services/frontend/node_modules/
+    ws:
+        build:
+            context: .
+            dockerfile: ./services/ws/Dockerfile.local
+        environment: 
+            PORT: 4329
+        ports:
+            - "4329:4329"
+        volumes:
+            - ./services/ws:/usr/app/services/ws
+            - /usr/app/services/ws/node_modules/   
     mongo:
         environment: 
             MONGO_INITDB_ROOT_USERNAME: niconiconii

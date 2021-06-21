@@ -4,18 +4,21 @@ services:
   api:
     container_name: FLOURS_API
     restart: unless-stopped
-    ports:
-      - "${PORT}:${PORT}"
     depends_on: 
       - mongo
   frontend:
     container_name: FLOURS_FRONTEND
     restart: unless-stopped
-    ports:
-      - "${PORT}:${PORT}"
     depends_on: 
       - api
+  ws:
+    container_name: FLOURS_WS
+    restart: unless-stopped
+    depends_on: 
+      - mongo
   mongo:
     container_name: FLOURS_MONGO_DB
     image: mongo
     restart: unless-stopped
+    volumes: 
+      - /db/mongo:/data/db

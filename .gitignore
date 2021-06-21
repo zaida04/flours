@@ -2,6 +2,7 @@ node_modules/
 dist/
 types/
 coverage/
+data/
 
 .npmrc
 *.tsbuildinfo

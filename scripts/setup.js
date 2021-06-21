@@ -1,7 +1,7 @@
 const { exec } = require('child_process');
 const logExecOutput = data => console.log(data);
 
-const runNPMInstall = exec('cd .. && npm i');
+const runNPMInstall = exec('cd .. && pnpm i --r');
 runNPMInstall.stdout.on('data', logExecOutput);
 runNPMInstall.stderr.on('data', logExecOutput);
 runNPMInstall.on('close', () => {

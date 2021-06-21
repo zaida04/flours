@@ -1,12 +1,12 @@
 {
-    "name": "@flours/api",
+    "name": "@flours/ws",
     "version": "1.0.0",
-    "description": "Flours API service",
+    "description": "Flours WS service",
     "main": "./dist/index.js",
     "scripts": {
         "build": "tsc",
         "start": "node dist/index.js",
-        "dev": "nodemon"
+        "dev": "npx nodemon"
     },
     "devDependencies": {
         "@types/compression": "^1.7.0",
@@ -17,7 +17,7 @@
     },
     "dependencies": {
         "express": "^4.17.1",
-        "express-session": "^1.17.2",
+        "express-session": "^1.17.1",
         "express-validator": "^6.6.1",
         "mongoose": "^5.12.14",
         "tslib": "^2.0.3",
