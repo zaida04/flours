@@ -11,7 +11,9 @@ export async function connectToDB({
   host: string;
   db: string;
 }) {
-  return connect(`mongodb://${username}:${password}@${host}/${db}`, {
+  console.log(`mongodb://${username}:${encodeURI(password)}@${host}/${db}`);
+
+  return connect(`mongodb://${username}:${encodeURI(password)}@${host}/${db}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });

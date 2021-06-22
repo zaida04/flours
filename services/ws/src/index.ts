@@ -47,7 +47,7 @@ io.on('connection', socket => {
 (async () => {
   await connectToDB({
     db: process.env.MONGO_DB,
-    host: process.env.MONGO_HOST,
+    host: process.env.MONGO_HOST ?? 'mongo:27017',
     password: process.env.MONGO_PASS,
     username: process.env.MONGO_USERNAME,
   });

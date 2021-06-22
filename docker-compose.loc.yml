@@ -8,7 +8,6 @@ services:
         environment: 
             MONGO_USERNAME: niconiconii
             MONGO_PASS: にっこにっこにー
-            MONGO_HOST: localhost
             MONGO_DB: testingdb
             JWT_KEY: thisisatestkey
             PORT: 4327
@@ -36,7 +35,6 @@ services:
         environment: 
             MONGO_USERNAME: niconiconii
             MONGO_PASS: にっこにっこにー
-            MONGO_HOST: localhost
             MONGO_DB: testingdb
             PORT: 4329
         ports:
@@ -45,6 +43,8 @@ services:
             - ./services/ws:/usr/app/services/ws
             - /usr/app/services/ws/node_modules/   
     mongo:
+        ports:
+            - "27017:27017"
         environment: 
             MONGO_INITDB_ROOT_USERNAME: niconiconii
             MONGO_INITDB_ROOT_PASSWORD: にっこにっこにー

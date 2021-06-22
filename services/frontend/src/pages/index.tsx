@@ -1,26 +1,32 @@
-import Link from "next/link";
-import Layout from "../components/Layout";
-import { IRoom } from "@flours/common";
+import Link from 'next/link';
+import Layout from '../components/Layout';
+import {IRoom} from '@flours/common';
 
-export default async function Home() {
-    const roomsFetch = await fetch(`${process.env.API_URL}/rooms`);
-    const roomsData: IRoom[] = await roomsFetch.json();
-    console.log(roomsData);
+export default function App({roomsData}: {roomsData: IRoom[]}) {
+  return (
+    <Layout title="Flours">
+      <h1>Welcome to Flours!</h1>
+      <p>
+        We're not quite sure what's going on either, but hey, we're glad to see
+        you.
+      </p>
+      <br />
+      {roomsData.map(room => {
+        <Link href={`/join/${room.id}`}>
+          <a>Join room ${room.name}</a>
+        </Link>;
+      })}
+    </Layout>
+  );
+}
 
-    return (
-        <Layout title="Flours">
-            <h1>Welcome to Flours!</h1>
-            <p>We're not quite sure what's going on either, but hey, we're glad to see you.</p>
-            <br />
-            {
-              roomsData.map(room => {
-                return <Link href={`/join/${room.id}`}>
-                  <a>Join room ${room.name}</a>
-                </Link>
-              })
-            }
-        </Layout>
-    );
+export async function getServerSideProps() {
+  const roomsFetch = await fetch(`http://${process.env.API_URL}/rooms`);
+  const roomsData: IRoom[] = await roomsFetch.json();
+
+  return {
+    props: {roomsData},
+  };
 }
 
 /*

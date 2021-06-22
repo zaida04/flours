@@ -13,11 +13,14 @@ jobs:
         with:
           node-version: 12
 
-      - name: Install Main Dependencies
-        run: npm i
+      - name: Install PNPM
+        run: npm i -g pnpm
 
-      - name: Install Sub Dependencies
-        run: npm run bootstrap
+      - name: Install All Dependencies
+        run: pnpm i --r
+
+      - name: Run ESLint
+        run: pnpm run lint
 
       - name: Run TypeScript compiler
         run: npm run build

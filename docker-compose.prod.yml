@@ -9,7 +9,3 @@ services:
     env_file: .env
     ports:
       - "${PORT}:${PORT}"
-  mongo:
-    env_file: .env
-    ports:
-      - "${PORT}:${PORT}"
