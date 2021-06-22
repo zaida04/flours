@@ -22,7 +22,7 @@ mongoose
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.log(err));
 
-import {Account, Room, IRoom} from '@flours/common';
+import {Room, IRoom} from '@flours/common';
 declare module 'express-session' {
     interface SessionData {
         user: {
@@ -47,124 +47,9 @@ app.use(bodyParser());
 app.use(cookieParser());
 app.use(compression());
 const api = express.Router();
-const accounts = express.Router();
 const rooms = express.Router();
 
 api.get('/', (req, res) => res.json({response: 'test!'}));
-
-accounts.post(
-    '/signup',
-    routeValidator(
-        body('email', 'Must supply an email.')
-            .notEmpty()
-            .isString()
-            .isLength({max: 30})
-            .trim(),
-        body('username', 'Must supply an username.')
-            .notEmpty()
-            .isString()
-            .isLength({max: 30})
-            .trim(),
-        body('password', 'Must supply a password between 4 and 30 characters.')
-            .notEmpty()
-            .isString()
-            .isLength({min: 4, max: 30})
-            .trim()
-    ),
-    async (req, res) => {
-        const {email, username, password} = req.body;
-        // get existing account record
-        const existingAccount = await Account.findOne({email});
-        // if account exist, reject
-        if (existingAccount) {
-            return res.status(409).send({
-                error: 'USER_ALREADY_EXISTS',
-                message: 'User with that email or username already exists!',
-                status: 409,
-            });
-        }
-        // user ID
-        const id = v4();
-        // encrypt password
-        const hashedPassword = await bcrypt.hash(
-            password,
-            await bcrypt.genSalt(10)
-        );
-        // create the user JWT
-        const token = sign({id}, process.env.JWT_KEY);
-
-        // insert user into database
-        const newUser = new Account({
-            email,
-            id,
-            password: hashedPassword,
-            token,
-            username,
-            permissions: [],
-        });
-        await newUser.save();
-        return res.status(200).send({token});
-    }
-);
-
-accounts.post(
-    '/login',
-    routeValidator(
-        body('username', 'Must supply an username.')
-            .notEmpty()
-            .isString()
-            .isLength({max: 30})
-            .trim(),
-        body('password', 'Must supply an username.')
-            .notEmpty()
-            .isString()
-            .isLength({max: 30})
-            .trim()
-    ),
-    async (req, res) => {
-        const {username, password} = req.body;
-
-        const checkIfUserExists = await Account.findOne({username});
-
-        if (!checkIfUserExists) {
-            return res.status(404).send({
-                error: 'USER_NOT_FOUND',
-                message: 'User with that username does not exist!',
-                statusCode: 404,
-            });
-        }
-
-        // compare hashed password to supplied password
-        if (!(await bcrypt.compare(password, checkIfUserExists.password))) {
-            return res.status(401).send({
-                error: 'INCORRECT_PASSWORD',
-                message: 'Invalid username/password!',
-                statusCode: 401,
-            });
-        }
-
-        // create the user JWT
-        const token = sign({id: checkIfUserExists.id}, process.env.JWT_KEY);
-        return res.status(200).send({token});
-    }
-);
-
-accounts.get('/:userID', async (req, res) => {
-    const {userID} = req.params;
-
-    const user = await Account.findOne({id: userID});
-    if (!user) {
-        return res.status(404).json({
-            code: 'USER_NOT_FOUND',
-            message: 'A user with that ID is not found.',
-            status: 404,
-        });
-    }
-
-    user.password = 'nope';
-    return res.status(200).json(user);
-});
-
 rooms
     .route('/')
     .get(async (_, res) => {
@@ -231,7 +116,6 @@ rooms
     .put(async (req, res) => {});
 
 api.use('/rooms', rooms);
-api.use('/accounts', accounts);
 app.use('/api', api);
 app.use((_, res, __) =>
     res.status(404).json({

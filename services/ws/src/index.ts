@@ -1,7 +1,7 @@
 import express from 'express';
 import * as socketio from 'socket.io';
 import {Server} from 'http';
-import {Account, Room} from '@flours/common';
+import {Room} from '@flours/common';
 import {connect} from 'mongoose';
 
 connect(process.env.MONGO_URI!, {
@@ -22,13 +22,9 @@ io.on('connection', socket => {
         if (!roomID || !userID) return;
         const room = await Room.findOne({id: roomID});
         if (!room) return socket.disconnect(true);
-        const user = await Account.findOne({id: userID});
-        if (!user) return socket.disconnect(true);
-        user.password = 'no';
-        user.email = 'no';
 
         socket.join(roomID);
-        socket.to(roomID).emit('user-joined', user);
+        socket.to(roomID).emit('user-joined', {userID});
 
         room.users.push(userID);
         await room.save();
@@ -38,11 +34,9 @@ io.on('connection', socket => {
         if (!roomID || !userID) return;
         const room = await Room.findOne({id: roomID});
         if (!room) return socket.disconnect(true);
-        const user = await Account.findOne({id: userID});
-        if (!user) return socket.disconnect(true);
 
         socket.join(roomID);
-        socket.to(roomID).emit('user-left', userID);
+        socket.to(roomID).emit('user-left', {userID});
 
         room.users = room.users.filter(x => x !== userID);
         await room.save();
