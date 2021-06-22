@@ -4,9 +4,9 @@ services:
     api:
         build:
             context: .
-            dockerfile: ./services/api/Dockerfile.local
+            dockerfile: ./docker/api/Dockerfile.local
         environment: 
-            MONGO_URI: mongodb://niconiconii:thisisatest@mongoodatabase:27017/db
+            MONGO_URI: mongodb://niconiconii:thisisatest@mongo:27017/testing
             JWT_KEY: thisisatestkey
             PORT: 4327
         ports:
@@ -18,7 +18,7 @@ services:
     frontend:
         build:
             context: .
-            dockerfile: ./services/frontend/Dockerfile.local
+            dockerfile: ./docker/frontend/Dockerfile.local
         environment: 
             API_URL: localhost:4327/api
             WS_URL: localhost:4329/ws
@@ -30,9 +30,9 @@ services:
     ws:
         build:
             context: .
-            dockerfile: ./services/ws/Dockerfile.local
+            dockerfile: ./docker/ws/Dockerfile.local
         environment: 
-            MONGO_URI: mongodb://niconiconii:thisisatest@mongoodatabase:27017/db
+            MONGO_URI: mongodb://niconiconii:thisisatest@mongo:27017/testing
             PORT: 4329
         ports:
             - "4329:4329"
@@ -40,7 +40,7 @@ services:
             - ./services/ws:/usr/app/services/ws
         networks:
             - main-network
-    mongodatabase:
+    mongo:
         ports:
             - "27017:27017"
         environment: 

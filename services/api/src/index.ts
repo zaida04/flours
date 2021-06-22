@@ -1,8 +1,6 @@
 import express from 'express';
 import expressSession from 'express-session';
 import {v4} from 'uuid';
-import * as bcrypt from 'bcrypt';
-import {sign} from 'jsonwebtoken';
 import {body} from 'express-validator';
 import routeValidator from './util';
 import bodyParser from 'body-parser';
@@ -126,6 +124,7 @@ app.use((_, res, __) =>
 );
 
 app.listen(process.env.PORT, async () => {
+    console.log(`HTTP: ${await (await fetch(`http://api:4329/`)).text()}`);
     console.log(`DB status: ${mongoose.connection.readyState}`);
     console.log(`Server listening on port ${process.env.PORT}`);
 });

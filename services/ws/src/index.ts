@@ -17,6 +17,10 @@ const io = new socketio.Server(server, {
     transports: ['websocket'],
 });
 
+app.get('/', (req, res) => {
+    res.send('Yes!');
+});
+
 io.on('connection', socket => {
     socket.on('user-joined', async (roomID: string, userID: string) => {
         if (!roomID || !userID) return;
