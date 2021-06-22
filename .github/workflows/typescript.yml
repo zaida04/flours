@@ -19,8 +19,5 @@ jobs:
       - name: Install All Dependencies
         run: pnpm i --r
 
-      - name: Run ESLint
-        run: pnpm run lint
-
       - name: Run TypeScript compiler
         run: npm run build
