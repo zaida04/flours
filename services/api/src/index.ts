@@ -3,8 +3,26 @@ import expressSession from 'express-session';
 import {v4} from 'uuid';
 import * as bcrypt from 'bcrypt';
 import {sign} from 'jsonwebtoken';
-import {connectToDB, Account, Room, IRoom} from '@flours/common';
+import {body} from 'express-validator';
+import routeValidator from './util';
+import bodyParser from 'body-parser';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 
+['PORT', 'JWT_KEY', 'MONGO_URI'].forEach(x => {
+    if (!process.env[x]) throw new Error(`Missing ENV var ${x}!`);
+});
+
+mongoose
+    .connect(process.env.MONGO_URI!, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.log(err));
+
+import {Account, Room, IRoom} from '@flours/common';
 declare module 'express-session' {
     interface SessionData {
         user: {
@@ -14,83 +32,122 @@ declare module 'express-session' {
     }
 }
 
-['MONGO_USERNAME', 'MONGO_PASS', 'MONGO_DB', 'PORT', 'JWT_KEY'].forEach(x => {
-    if (!process.env[x]) throw new Error(`Missing ENV var ${x}!`);
-});
-
 const app = express();
+app.use(express.urlencoded()); // HTML FORMS
+app.use(express.json());
+app.use(
+    expressSession({
+        secret: 'keyboard cat',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {secure: true},
+    })
+);
+app.use(bodyParser());
+app.use(cookieParser());
+app.use(compression());
 const api = express.Router();
 const accounts = express.Router();
 const rooms = express.Router();
 
 api.get('/', (req, res) => res.json({response: 'test!'}));
 
-accounts.post('/signup', async (req, res) => {
-    const {email, username, password} = req.body;
+accounts.post(
+    '/signup',
+    routeValidator(
+        body('email', 'Must supply an email.')
+            .notEmpty()
+            .isString()
+            .isLength({max: 30})
+            .trim(),
+        body('username', 'Must supply an username.')
+            .notEmpty()
+            .isString()
+            .isLength({max: 30})
+            .trim(),
+        body('password', 'Must supply a password between 4 and 30 characters.')
+            .notEmpty()
+            .isString()
+            .isLength({min: 4, max: 30})
+            .trim()
+    ),
+    async (req, res) => {
+        const {email, username, password} = req.body;
+        // get existing account record
+        const existingAccount = await Account.findOne({email});
+        // if account exist, reject
+        if (existingAccount) {
+            return res.status(409).send({
+                error: 'USER_ALREADY_EXISTS',
+                message: 'User with that email or username already exists!',
+                status: 409,
+            });
+        }
+        // user ID
+        const id = v4();
+        // encrypt password
+        const hashedPassword = await bcrypt.hash(
+            password,
+            await bcrypt.genSalt(10)
+        );
+        // create the user JWT
+        const token = sign({id}, process.env.JWT_KEY);
 
-    // get existing account record
-    const existingAccount = await Account.findOne({email});
-
-    // if account exist, reject
-    if (existingAccount) {
-        return res.status(409).send({
-            error: 'USER_ALREADY_EXISTS',
-            message: 'User with that email or username already exists!',
-            status: 409,
+        // insert user into database
+        const newUser = new Account({
+            email,
+            id,
+            password: hashedPassword,
+            token,
+            username,
+            permissions: [],
         });
+        await newUser.save();
+        return res.status(200).send({token});
     }
+);
 
-    // user ID
-    const id = v4();
+accounts.post(
+    '/login',
+    routeValidator(
+        body('username', 'Must supply an username.')
+            .notEmpty()
+            .isString()
+            .isLength({max: 30})
+            .trim(),
+        body('password', 'Must supply an username.')
+            .notEmpty()
+            .isString()
+            .isLength({max: 30})
+            .trim()
+    ),
+    async (req, res) => {
+        const {username, password} = req.body;
 
-    // encrypt password
-    const hashedPassword = await bcrypt.hash(
-        password,
-        await bcrypt.genSalt(10)
-    );
+        const checkIfUserExists = await Account.findOne({username});
 
-    // create the user JWT
-    const token = sign({id}, process.env.JWT_KEY);
+        if (!checkIfUserExists) {
+            return res.status(404).send({
+                error: 'USER_NOT_FOUND',
+                message: 'User with that username does not exist!',
+                statusCode: 404,
+            });
+        }
 
-    // insert user into database
-    const newUser = new Account({
-        email,
-        id,
-        password: hashedPassword,
-        token,
-        username,
-    });
+        // compare hashed password to supplied password
+        if (!(await bcrypt.compare(password, checkIfUserExists.password))) {
+            return res.status(401).send({
+                error: 'INCORRECT_PASSWORD',
+                message: 'Invalid username/password!',
+                statusCode: 401,
+            });
+        }
 
-    await newUser.save();
-    return res.status(200).send({token});
-});
-
-accounts.post('/login', async (req, res) => {
-    const {username, password} = req.body;
-
-    const checkIfUserExists = await Account.findOne({username});
-
-    if (!checkIfUserExists) {
-        return res.status(404).send({
-            error: 'USER_NOT_FOUND',
-            message: 'User with that username does not exist!',
-            statusCode: 404,
-        });
+        // create the user JWT
+        const token = sign({id: checkIfUserExists.id}, process.env.JWT_KEY);
+        return res.status(200).send({token});
     }
-
-    // compare hashed password to supplied password
-    if (!(await bcrypt.compare(password, checkIfUserExists.password))) {
-        return res.status(401).send({
-            error: 'INCORRECT_PASSWORD',
-            message: 'Invalid username/password!',
-            statusCode: 401,
-        });
-    }
-
-    // create the user JWT
-    const token = sign({id: checkIfUserExists.id}, process.env.JWT_KEY);
-    return res.status(200).send({token});
-});
+);
 
 accounts.get('/:userID', async (req, res) => {
     const {userID} = req.params;
@@ -114,34 +171,43 @@ rooms
         const rooms = await Room.find({closed: false});
         return res.status(200).json(rooms);
     })
-    .post(async (req, res) => {
-        const {name} = req.body;
+    .post(
+        routeValidator(
+            body('name', 'Must supply a room name.')
+                .notEmpty()
+                .isString()
+                .isLength({max: 30})
+                .trim()
+        ),
+        async (req, res) => {
+            const {name} = req.body;
 
-        const existingRoom = await Room.findOne({
-            closed: false,
-            creator: req.session.user!.id,
-        });
-
-        if (existingRoom) {
-            return res.status(400).json({
-                code: 'ALREADY_HAS_ROOM',
-                message:
-                    'You already have a room created under this account. Please close this existing room first before creating a new one.',
-                status: 400,
+            const existingRoom = await Room.findOne({
+                closed: false,
+                creator: req.session.user!.id,
             });
+
+            if (existingRoom) {
+                return res.status(400).json({
+                    code: 'ALREADY_HAS_ROOM',
+                    message:
+                        'You already have a room created under this account. Please close this existing room first before creating a new one.',
+                    status: 400,
+                });
+            }
+
+            const newRoom = new Room({
+                closed: false,
+                creator: req.session.user!.id,
+                id: v4(),
+                name,
+                users: [],
+            });
+
+            await newRoom.save();
+            return res.json(newRoom);
         }
-
-        const newRoom = new Room({
-            closed: false,
-            creator: req.session.user!.id,
-            id: v4(),
-            name,
-            users: [],
-        });
-
-        await newRoom.save();
-        return res.json(newRoom);
-    });
+    );
 
 rooms.use('/:roomID', async (req, res, next) => {
     const {roomID} = req.params;
@@ -175,15 +241,7 @@ app.use((_, res, __) =>
     })
 );
 
-(async () => {
-    await connectToDB({
-        db: process.env.MONGO_DB,
-        host: process.env.MONGO_HOST ?? 'mongo:27017',
-        password: process.env.MONGO_PASS,
-        username: process.env.MONGO_USERNAME,
-    });
-
-    app.listen(process.env.PORT, () => {
-        console.log(`Server listening on port ${process.env.PORT}`);
-    });
-})();
+app.listen(process.env.PORT, async () => {
+    console.log(`DB status: ${mongoose.connection.readyState}`);
+    console.log(`Server listening on port ${process.env.PORT}`);
+});

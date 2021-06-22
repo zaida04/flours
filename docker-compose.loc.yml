@@ -6,45 +6,49 @@ services:
             context: .
             dockerfile: ./services/api/Dockerfile.local
         environment: 
-            MONGO_USERNAME: niconiconii
-            MONGO_PASS: にっこにっこにー
-            MONGO_DB: testingdb
+            MONGO_URI: mongodb+srv://test_user:test_pass@main.4xbet.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
             JWT_KEY: thisisatestkey
             PORT: 4327
         ports:
             - "4327:4327"
         volumes:
             - ./services/api:/usr/app/services/api
-            - /usr/app/services/api/node_modules/
+        networks:
+            - main-network
     frontend:
         build:
             context: .
             dockerfile: ./services/frontend/Dockerfile.local
         environment: 
             API_URL: localhost:4327/api
+            WS_URL: localhost:4329/ws
             PORT: 4328
         ports:
             - "4328:4328"
         volumes:
             - ./services/frontend:/usr/app/services/frontend
-            - /usr/app/services/frontend/node_modules/
     ws:
         build:
             context: .
             dockerfile: ./services/ws/Dockerfile.local
         environment: 
-            MONGO_USERNAME: niconiconii
-            MONGO_PASS: にっこにっこにー
-            MONGO_DB: testingdb
+            MONGO_URI: mongodb+srv://test_user:test_pass@main.4xbet.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
             PORT: 4329
         ports:
             - "4329:4329"
         volumes:
             - ./services/ws:/usr/app/services/ws
-            - /usr/app/services/ws/node_modules/   
-    mongo:
+        networks:
+            - main-network
+    mongodatabase:
         ports:
             - "27017:27017"
         environment: 
             MONGO_INITDB_ROOT_USERNAME: niconiconii
-            MONGO_INITDB_ROOT_PASSWORD: にっこにっこにー
+            MONGO_INITDB_ROOT_PASSWORD: thisisatest
+            MONGO_INITDB_DATABASE: testing
+        networks:
+            - main-network
+networks:
+    main-network:
+        driver: bridge

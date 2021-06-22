@@ -1,7 +1,7 @@
 const rimraf = require('rimraf');
 const {join} = require('path');
 
-const packages = ['api', 'frontend'];
+const packages = ['api', 'frontend', 'ws'];
 rimraf.sync(join(__dirname, '..', 'node_modules'));
 console.log('Deleting root node_modules');
 

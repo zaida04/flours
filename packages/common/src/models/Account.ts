@@ -3,7 +3,7 @@ import {model, Schema} from 'mongoose';
 // 1. Create an interface representing a document in MongoDB.
 export interface IAccount {
     id: string;
-    name: string;
+    username: string;
     email: string;
     password: string;
     token: string;
@@ -12,7 +12,7 @@ export interface IAccount {
 
 const accountSchema = new Schema<IAccount>({
     id: {type: String, required: true},
-    name: {type: String, required: true},
+    username: {type: String, required: true},
     email: {type: String, required: true},
     password: {type: String, required: true},
     token: {type: String, required: false, default: null},

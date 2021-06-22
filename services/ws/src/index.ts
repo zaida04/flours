@@ -1,7 +1,13 @@
 import express from 'express';
 import * as socketio from 'socket.io';
 import {Server} from 'http';
-import {Account, connectToDB, Room} from '@flours/common';
+import {Account, Room} from '@flours/common';
+import {connect} from 'mongoose';
+
+connect(process.env.MONGO_URI!, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
 
 const app = express();
 const server = new Server(app);
@@ -44,14 +50,6 @@ io.on('connection', socket => {
     });
 });
 
-(async () => {
-    await connectToDB({
-        db: process.env.MONGO_DB,
-        host: process.env.MONGO_HOST ?? 'mongo:27017',
-        password: process.env.MONGO_PASS,
-        username: process.env.MONGO_USERNAME,
-    });
-    server.listen(process.env.PORT, () => {
-        console.log('WS server up!');
-    });
-})();
+server.listen(process.env.PORT, () => {
+    console.log('WS server up!');
+});

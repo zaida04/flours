@@ -5,7 +5,7 @@ services:
     container_name: FLOURS_API
     restart: unless-stopped
     depends_on: 
-      - mongo
+      - mongodatabase
   frontend:
     container_name: FLOURS_FRONTEND
     restart: unless-stopped
@@ -15,10 +15,10 @@ services:
     container_name: FLOURS_WS
     restart: unless-stopped
     depends_on: 
-      - mongo
-  mongo:
+      - mongodatabase
+  mongodatabase:
     container_name: FLOURS_MONGO_DB
     image: mongo
     restart: unless-stopped
     volumes: 
-      - /db/mongo:/data/db
+      - ./volumes/db/mongo:/data/db

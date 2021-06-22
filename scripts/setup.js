@@ -5,7 +5,7 @@ const runNPMInstall = exec('cd .. && pnpm i --r');
 runNPMInstall.stdout.on('data', logExecOutput);
 runNPMInstall.stderr.on('data', logExecOutput);
 runNPMInstall.on('close', () => {
-  const runBuild = exec('cd .. && npm run build');
+  const runBuild = exec('cd .. && pnpm run build');
   runBuild.stdout.on('data', logExecOutput);
   runBuild.stderr.on('data', logExecOutput);
   runBuild.on('close', () => {
